@@ -104,11 +104,25 @@ h4{
 .modal-footer{
   margin-top: 10px;
   border-top: 1px solid rgb(184, 184, 184);
+  width: 200px;
+  display: flex;
+  justify-content: space-between;
 }
 
 button{
   margin-top: 5px;
   cursor: pointer;
+  border: none;
+  height: 40px;
+  width: 48%;
+  border-radius: 10px;
+  color: #fff;
 }
-/* // дз */
 
+.btn-primary{
+  background: red;
+}
+
+.btn-danger{
+  background: blue;
+}

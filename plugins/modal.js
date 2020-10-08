@@ -1,3 +1,31 @@
+Element.prototype.appendAffter = function(e) {
+  e.parentNode.insertBefore(this, e.nextSibling)
+}
+
+function noop() {}
+
+function _createModalFooter(buttons = []) {
+  if (buttons.length === 0) {
+
+    return document.createElement('div')
+  }
+
+  const wrap = document.createElement('div')
+  wrap.classList.add('modal-footer')
+
+  buttons.forEach(btn => {
+    const $btn = document.createElement('button');
+    $btn.textContent = btn.text
+    $btn.classList.add('btn')
+    $btn.classList.add(`btn-${btn.type || `secondary`}`)
+    $btn.onclick = btn.handler || noop
+
+    wrap.appendChild($btn)
+  });
+
+  return wrap
+}
+
 function _createModal(options) {
   const defaultWidth = '600px'
   const modal = document.createElement('div')
@@ -9,16 +37,14 @@ function _createModal(options) {
         <span class="modal-title">${options.title || 'Тайтл'}</span>
         ${options.closable ? `<span class="modal-close" data-close="true">&times;</span>` : ''}
       </div>
-      <div class="modal-body">
+      <div class="modal-body" data-content>
         ${options.content || ''}
-      </div>
-      <div class="modal-footer">
-        <button>Ok</button>
-        <button>Cancel</button>
       </div>
     </div>
   </div>
   `)
+  const footer = _createModalFooter(options.footerButtons)
+  footer.appendAffter(modal.querySelector('[data-content]'))
   document.body.appendChild(modal)
   return modal
 };
@@ -28,7 +54,7 @@ function _createModal(options) {
 *closable +
 * content: string +
 *width: string ('400px') +
-*destroy(): void
+*destroy(): void +
  закрытие на крестик и фон +
  ------------
   setContent(html: string): void | PUBLIC
@@ -44,9 +70,14 @@ $.modal = function(options) {
   const $modal = _createModal(options); 
   let closing = false
   // let content = document.querySelector('.modal-window');
+  let destroyed = false
+
 
   const modal = {
     open() {
+      if (destroyed) {
+        return console.log('Modal is destroyed');
+      }
       !closing && $modal.classList.add('open');
       // content.style.width = '400px';
   },
@@ -61,13 +92,22 @@ $.modal = function(options) {
     },
   }
 
-  $modal.addEventListener('click', e => {
-    console.log('Clicked', e.target.dataset.close);
+  const listener = e => {
     if (e.target.dataset.close) {
       modal.close()
     }
-  })
+  }
 
-    return modal
-   
+  $modal.addEventListener('click', listener)
+
+  return Object.assign(modal, {
+    destroy() {
+      $modal.parentNode.removeChild($modal); // удаление ноды из дом дерева
+      $modal.removeEventListener('click', listener);
+      destroyed = true;
+    },
+    setContent(html) {
+      $modal.querySelector('[data-content]').innerHTML = html;
+    }
+  });
 }
