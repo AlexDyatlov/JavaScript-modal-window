@@ -1,19 +1,59 @@
-const modal = $.modal({
-  title: 'Modal title',
+let fruits = [
+  {id: 1, title: 'Ябоки', price: 100, img: 'https://e1.edimdoma.ru/data/ingredients/0000/2374/2374-ed4_wide.jpg?1487746348'},
+  {id: 2, title: 'Апельсины', price: 200, img: 'https://fashion-stil.ru/wp-content/uploads/2019/04/apelsin-ispaniya-kg-92383155888981_small6.jpg'},
+  {id: 3, title: 'Манго', price: 300, img: 'https://itsfresh.ru/upload/iblock/178/178d8253202ef1c7af13bdbd67ce65cd.jpg'}
+]
+
+const toHTML = fruit => `
+  <div class="card">
+    <img class="card-img-top" src="${fruit.img}" alt="${fruit.title}">
+      <div class="card-body">
+        <h5 class="card-title">${fruit.title}</h5>
+        <div class="btn-items">
+          <a href="#" class="btn btn-primary" data-btn="price" data-id="${fruit.id}">Посмотреть цену</a>
+          <a href="#" class="btn btn-danger" data-btn="remove" data-id="${fruit.id}">Удалить</a>
+        </div>
+    </div>
+  </div>
+`
+function render() {
+  const html = fruits.map(toHTML).join('')
+  document.querySelector('#fruits').innerHTML = html;
+};
+
+render();
+
+const priceModal = $.modal({
+  title: 'Цена на Товар',
   closable: true,
-  content: `
-    <h4>Modal is working</h4>
-    <p>Lorem ipsum dolor sit.</p>
-  `,
   width: '400px',
   footerButtons: [
-    {text: 'Ок', type: 'primary', handler() {
-      // console.log('Primary btn clicked');
-      modal.close()
-    }},
-    {text: 'Cancel', type: 'danger', handler() {
-      // console.log('Danger btn clicked');
-      modal.close()
+    {text: 'Закрыть', type: 'primary', handler() {
+      priceModal.close()
     }},
   ]
-})
+});
+
+document.addEventListener('click', e => {
+  e.preventDefault()
+  const btnType = e.target.dataset.btn;
+  const id = +e.target.dataset.id;
+  const fruit = fruits.find(f => f.id === id)
+
+  if (btnType === 'price') {
+    priceModal.setContent(`
+      <p>Цена на ${fruit.title}: <strong>${fruit.price}₽</strong></p>
+    `)
+    priceModal.open();
+  } else if (btnType === 'remove') {
+    $.confirm({
+      title: 'Вы уверены?',
+      content: `<p>Вы удаляете фрукт: <strong>${fruit.price}₽</strong></p>`
+    })
+    .then(() => {
+      fruits = fruits.filter( f => f.id !== id)
+      render()
+    })
+    .catch(() => { })
+  }
+});

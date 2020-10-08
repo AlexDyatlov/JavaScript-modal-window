@@ -49,29 +49,12 @@ function _createModal(options) {
   return modal
 };
 
-/* ДЗ
-*title: string +
-*closable +
-* content: string +
-*width: string ('400px') +
-*destroy(): void +
- закрытие на крестик и фон +
- ------------
-  setContent(html: string): void | PUBLIC
-  onClose(): void
-  onOpne(): void
-  beforeClose(): boolean
-  --------
-  animate.css
-*/
-
 $.modal = function(options) {
   const ANIMATION_SPEED = 200;
   const $modal = _createModal(options); 
   let closing = false
   // let content = document.querySelector('.modal-window');
   let destroyed = false
-
 
   const modal = {
     open() {
@@ -88,6 +71,9 @@ $.modal = function(options) {
       setTimeout(() => {
         $modal.classList.remove('hide')
         closing = false
+        if (typeof options.onClose === 'function') {
+          options.onClose()
+        }
       }, ANIMATION_SPEED)
     },
   }
